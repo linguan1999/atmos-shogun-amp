@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Atomos Shogun Studio AMP 控制台 - 界面预览</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    background: #2b2b2b;
+    color: #eee;
+    padding: 20px;
+  }
+  .window {
+    background: #3a3a3a;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    max-width: 920px;
+    margin: 0 auto;
+  }
+  .titlebar {
+    background: linear-gradient(180deg, #4a4a4a, #3a3a3a);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #222;
+  }
+  .dots { display: flex; gap: 8px; margin-right: 16px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+  .title { font-size: 14px; font-weight: 600; color: #ddd; }
+
+  .section {
+    padding: 14px 16px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .section-title {
+    font-size: 12px;
+    color: #8ab4f8;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  /* 连接面板 */
+  .conn-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .field { display: flex; align-items: center; gap: 6px; }
+  .field label { font-size: 12px; color: #aaa; }
+  .input {
+    background: #1e1e1e;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #fff;
+    font-size: 13px;
+    font-family: "Menlo", monospace;
+  }
+  .input.ip { width: 140px; }
+  .input.port { width: 60px; }
+
+  .btn {
+    background: #0a84ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: default;
+  }
+  .btn.gray { background: #6c6c6c; }
+  .btn.red { background: #ff453a; }
+  .btn.green { background: #30d158; }
+  .btn.scan { background: #bf5af2; }
+  .status {
+    font-size: 12px;
+    color: #ff453a;
+  }
+  .status::before { content: "● "; }
+
+  /* 扫描结果行 */
+  .scan-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .scan-label { font-size: 11px; color: #aaa; }
+  .combo {
+    flex: 1;
+    background: #1e1e1e;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #8ab4f8;
+    font-size: 12px;
+    font-family: "Menlo", monospace;
+  }
+  .scan-info { font-size: 11px; color: #30d158; }
+
+  /* 双屏 */
+  .dual { display: flex; gap: 12px; }
+  .channel {
+    flex: 1;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .channel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .channel-badge {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: white;
+  }
+  .badge-a { background: #0a84ff; }
+  .badge-b { background: #bf5af2; }
+  .channel-name { font-size: 13px; font-weight: 600; }
+
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .ctrl-btn {
+    background: #484848;
+    border: 1px solid #5a5a5a;
+    border-radius: 6px;
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 12px;
+    color: #eee;
+    cursor: default;
+    transition: background 0.15s;
+  }
+  .ctrl-btn:hover { background: #555; }
+  .ctrl-btn.rec { color: #ff453a; font-weight: 600; }
+  .ctrl-btn.play { color: #30d158; }
+
+  .mode-row { display: flex; gap: 6px; }
+  .mode-btn {
+    flex: 1;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 11px;
+    color: #ccc;
+  }
+
+  /* 全局控制 */
+  .global-row { display: flex; gap: 10px; }
+  .global-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+  }
+  .global-btn.rec { background: #ff453a; color: white; }
+  .global-btn.stop { background: #8e8e93; color: white; }
+  .global-btn.play { background: #30d158; color: white; }
+
+  /* 命令控制台 */
+  .cmd-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .cmd-input {
+    flex: 1;
+    background: #1e1e1e;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #fff;
+    font-family: "Menlo", monospace;
+    font-size: 13px;
+  }
+  .quick-row { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
+  .quick-label { font-size: 11px; color: #888; }
+  .quick-btn {
+    background: #2d2d2d;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: #8ab4f8;
+    font-family: "Menlo", monospace;
+  }
+
+  .log {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: "Menlo", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    height: 180px;
+    overflow-y: auto;
+  }
+  .log-line { color: #aaa; }
+  .log-ts { color: #666; }
+  .log-ok { color: #4ec9b0; }
+  .log-err { color: #f48771; }
+  .log-send { color: #8ab4f8; }
+
+  .hint {
+    text-align: center;
+    color: #888;
+    font-size: 11px;
+    margin-top: 12px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="window">
+  <!-- 标题栏 -->
+  <div class="titlebar">
+    <div class="dots">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+    </div>
+    <div class="title">Atomos Shogun Studio AMP 控制台</div>
+  </div>
+
+  <!-- 连接面板 -->
+  <div class="section">
+    <div class="section-title">网络连接</div>
+    <div class="conn-row">
+      <div class="field">
+        <label>IP:</label>
+        <div class="input ip">192.168.1.100</div>
+      </div>
+      <div class="field">
+        <label>端口:</label>
+        <div class="input port">8900</div>
+      </div>
+      <button class="btn scan">🔍 扫描设备</button>
+      <button class="btn">连接</button>
+      <span class="status">未连接</span>
+    </div>
+    <div class="scan-row">
+      <span class="scan-label">发现的设备:</span>
+      <div class="combo">192.168.1.100  (PONG)</div>
+      <span class="scan-info">发现 1 台设备</span>
+    </div>
+  </div>
+
+  <!-- 双屏控制 -->
+  <div class="section">
+    <div class="section-title">双通道控制 (A / B 独立)</div>
+    <div class="dual">
+      <!-- 通道 A -->
+      <div class="channel">
+        <div class="channel-header">
+          <div class="channel-badge badge-a">A</div>
+          <div class="channel-name">通道 A (左屏)</div>
+        </div>
+        <div class="btn-grid">
+          <div class="ctrl-btn rec">● 录制 REC</div>
+          <div class="ctrl-btn">■ 停止 STOP</div>
+          <div class="ctrl-btn play">▶ 播放 PLAY</div>
+          <div class="ctrl-btn">⏸ 暂停 PAUSE</div>
+          <div class="ctrl-btn">⏩ 快进 FFWD</div>
+          <div class="ctrl-btn">⏪ 快退 RWND</div>
+        </div>
+        <div class="mode-row">
+          <div class="mode-btn">监控 MONITOR</div>
+          <div class="mode-btn">回放 PLAYBACK</div>
+          <div class="mode-btn">弹出 EJECT</div>
+        </div>
+      </div>
+
+      <!-- 通道 B -->
+      <div class="channel">
+        <div class="channel-header">
+          <div class="channel-badge badge-b">B</div>
+          <div class="channel-name">通道 B (右屏)</div>
+        </div>
+        <div class="btn-grid">
+          <div class="ctrl-btn rec">● 录制 REC</div>
+          <div class="ctrl-btn">■ 停止 STOP</div>
+          <div class="ctrl-btn play">▶ 播放 PLAY</div>
+          <div class="ctrl-btn">⏸ 暂停 PAUSE</div>
+          <div class="ctrl-btn">⏩ 快进 FFWD</div>
+          <div class="ctrl-btn">⏪ 快退 RWND</div>
+        </div>
+        <div class="mode-row">
+          <div class="mode-btn">监控 MONITOR</div>
+          <div class="mode-btn">回放 PLAYBACK</div>
+          <div class="mode-btn">弹出 EJECT</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 全局控制 -->
+  <div class="section">
+    <div class="section-title">全局控制 (A + B 同时)</div>
+    <div class="global-row">
+      <button class="global-btn rec">● 全部录制</button>
+      <button class="global-btn stop">■ 全部停止</button>
+      <button class="global-btn play">▶ 全部播放</button>
+    </div>
+  </div>
+
+  <!-- 自定义命令控制台 -->
+  <div class="section">
+    <div class="section-title">自定义命令控制台 (AMP 原始命令)</div>
+    <div class="cmd-input-row">
+      <input class="cmd-input" placeholder="输入 AMP 命令，回车发送..." value="PING">
+      <button class="btn">发送</button>
+      <button class="btn gray">清空日志</button>
+    </div>
+    <div class="quick-row">
+      <span class="quick-label">快捷:</span>
+      <div class="quick-btn">PING</div>
+      <div class="quick-btn">STATUS</div>
+      <div class="quick-btn">GETINFO</div>
+      <div class="quick-btn">VERSION</div>
+    </div>
+    <div class="log">
+      <div class="log-line"><span class="log-ts">[14:23:01]</span> <span class="log-send">>>> 发送: PING</span></div>
+      <div class="log-line"><span class="log-ts">[14:23:01]</span> <span class="log-ok"><<< 响应: PONG</span></div>
+      <div class="log-line"><span class="log-ts">[14:23:05]</span> <span class="log-send">>>> 发送: A:RECORD</span></div>
+      <div class="log-line"><span class="log-ts">[14:23:05]</span> <span class="log-ok"><<< 响应: OK</span></div>
+      <div class="log-line"><span class="log-ts">[14:23:10]</span> <span class="log-send">>>> 发送: STATUS</span></div>
+      <div class="log-line"><span class="log-ts">[14:23:10]</span> <span class="log-ok"><<< 响应: A:RECORDING B:IDLE</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="hint">↑ 此为界面设计预览，实际软件为 Python tkinter 原生应用，运行后外观一致</div>
+
+</body>
+</html>

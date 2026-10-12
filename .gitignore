@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# 本地 Android SDK / 构建工具链（本机环境，不上传）
+.android-sdk/
+.gradle-home/
+.tools/
+
+# Android 构建产物与本地配置
+android_shogun/.gradle/
+android_shogun/build/
+android_shogun/app/build/
+android_shogun/local.properties
